@@ -1,5 +1,6 @@
 import influxdb
 import json
+import re
 
 
 class Knotenwanderung:
@@ -14,8 +15,16 @@ class Knotenwanderung:
     def __enter__(self):
         return self
 
+    def valid_hostname(self, hostname):
+        "Checks if some hostname satisfies the FFMR regex."
+        p = re.compile("35\d{3}-[\w-]{1,}")
+        return p.fullmatch(hostname) != None
+
     def hostname_to_node_ids(self, hostname):
         "List all 'node_id's for a 'hostname'."
+        if not self.valid_hostname(hostname):
+            return {}
+
         params = params={"params": json.dumps({"hostname": hostname})}
         result = self._influx.query("""
             SHOW TAG VALUES WITH key = "node_id"
