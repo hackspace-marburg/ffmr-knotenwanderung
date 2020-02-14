@@ -27,6 +27,12 @@
       body {
         padding-top: 4.5rem;
       }
+
+      .form-control:focus{
+        border-color: rgb(40, 167, 69);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
     </style>
   </head>
   <body>
@@ -34,10 +40,16 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="/">Knotenwanderung</a>
+      <a class="navbar-brand">Knotenwanderung</a>
 
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Main</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/bulk">Bulk</a>
+        </li>
         </ul>
 
         <form class="form-inline mt-2 mt-md-0" action="/s" method="post">
