@@ -1,6 +1,6 @@
 import configparser
 
-from bottle import get, post, redirect, request, route, run, template
+from bottle import error, get, post, redirect, request, route, run, template
 from knotenwanderung import Knotenwanderung
 
 
@@ -25,6 +25,12 @@ def search_hostname():
 def show_hostname(hostname):
     hostname_list = template("list.tpl", node_data=NODES.other_hostnames(hostname))
     return template("general.tpl", title=hostname, content=hostname_list)
+
+
+@error(404)
+@error(500)
+def error_page(err):
+    return template("general.tpl", title="Error", content="Something went wrong..")
 
 
 if __name__ == '__main__':
