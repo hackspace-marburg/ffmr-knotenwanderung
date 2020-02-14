@@ -6,11 +6,11 @@ as for the [Grafana][grafana]. Allows both querying single nodes and performing
 bulk requests.
 
 
-## Deployment
+## Development
 
 1. Install a recent Python 3 together with [bottle][] and [influxdb-python][].
 2. Copy `knotenwanderung_example.ini` to `knotenwanderung.ini` and edit it.
-3. `python knotenserv.py`
+3. `python -m knotenwanderung.knotenserv`
 
 
 [ffmr]: https://marburg.freifunk.net/
