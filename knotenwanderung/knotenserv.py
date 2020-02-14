@@ -1,8 +1,10 @@
 import configparser
+import sys
 
 from bottle import abort, error, get, post, redirect, request, route, run, template
 from functools import reduce
 from knotenwanderung.knotenwanderung import Knotenwanderung
+from os import path
 
 
 nodes = None
@@ -10,8 +12,9 @@ nodes = None
 
 @route("/")
 def greet():
-    return template("knotenwanderung/general.tpl",
-            title="Main", content=template("knotenwanderung/main.tpl"), search=None)
+    main_tpl = template("{}/main.tpl".format(path.dirname(__file__)))
+    return template("{}/general.tpl".format(path.dirname(__file__)),
+            title="Main", content=main_tpl, search=None)
 
 
 @post("/s")
@@ -28,15 +31,17 @@ def show_hostname(hostname):
     if not nodes.valid_hostname(hostname):
         abort(500)
 
-    hostname_list = template("knotenwanderung/list.tpl", node_data=nodes.other_hostnames(hostname))
-    return template("knotenwanderung/general.tpl",
+    hostname_list = template("{}/list.tpl".format(path.dirname(__file__)),
+        node_data=nodes.other_hostnames(hostname))
+    return template("{}/general.tpl".format(path.dirname(__file__)),
             title=hostname, content=hostname_list, search=hostname)
 
 
 @get("/bulk")
 def bulk_mask():
-    return template("knotenwanderung/general.tpl",
-            title="Bulk Search", content=template("knotenwanderung/bulk_search.tpl"), search=None)
+    bulk_mask_tpl = template("{}/bulk_search.tpl".format(path.dirname(__file__)))
+    return template("{}/general.tpl".format(path.dirname(__file__)),
+            title="Bulk Search", content=bulk_mask_tpl, search=None)
 
 
 @post("/bulk")
@@ -53,21 +58,26 @@ def bulk_search():
     hostname_len = {k: reduce(lambda a, b: a + b, list(map(len, v.values())) + [0])
             for k, v in hostname_map.items()}
 
-    hostname_len_tpl = template("knotenwanderung/bulk_result.tpl", hostname_len=hostname_len)
-    return template("knotenwanderung/general.tpl",
+    hostname_len_tpl = template("{}/bulk_result.tpl".format(path.dirname(__file__)),
+        hostname_len=hostname_len)
+    return template("{}/general.tpl".format(path.dirname(__file__)),
             title="Bulk Search", content=hostname_len_tpl, search=None)
 
 
 @error(404)
 @error(500)
 def error_page(err):
-    return template("knotenwanderung/general.tpl",
+    return template("{}/general.tpl".format(path.dirname(__file__)),
             title="Error", content="Something went wrong..", search=None)
 
 
 def main():
+    if len(sys.argv) != 2:
+        print("Usage: {} config.ini".format(sys.argv[0]))
+        return
+
     conf = configparser.ConfigParser()
-    conf.read("knotenwanderung.ini")
+    conf.read(sys.argv[1])
 
     global nodes
     nodes = Knotenwanderung(**conf["InfluxDBClient"])

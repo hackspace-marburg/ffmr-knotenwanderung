@@ -10,7 +10,31 @@ bulk requests.
 
 1. Install a recent Python 3 together with [bottle][] and [influxdb-python][].
 2. Copy `knotenwanderung_example.ini` to `knotenwanderung.ini` and edit it.
-3. `python -m knotenwanderung.knotenserv`
+3. `python -m knotenwanderung.knotenserv knotenwanderung.ini`
+
+
+## NixOS Deployment
+
+Take a look at the `module.nix` file and adjust it to your needs. After being
+included, one might configure its system as follows:
+
+```nix
+{
+  services.knotenwanderung = {
+    enable = true;
+
+    # Values from the ini configuration.
+    config = {
+      "InfluxDBClient" = {
+        "host" = "localhost"; "port" = 1312; "database" = "ff";
+      };
+      "Bottle" = {
+        "host" = "localhost"; "port" = "8080";
+      };
+    };
+  };
+}
+```
 
 
 [ffmr]: https://marburg.freifunk.net/
