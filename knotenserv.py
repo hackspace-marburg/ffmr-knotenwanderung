@@ -1,5 +1,4 @@
 import configparser
-import json
 
 from bottle import get, post, redirect, request, route, run, template
 from knotenwanderung import Knotenwanderung
@@ -10,7 +9,7 @@ NODES = None
 
 @route("/")
 def greet():
-    return template("template.tpl", title="Main", content="nope")
+    return template("general.tpl", title="Main", content=template("main.tpl"))
 
 
 @post("/s")
@@ -24,8 +23,8 @@ def search_hostname():
 
 @get("/s/<hostname>")
 def show_hostname(hostname):
-    nodes = json.dumps(NODES.other_hostnames(hostname))
-    return template("template.tpl", title=hostname, content=nodes)
+    hostname_list = template("list.tpl", node_data=NODES.other_hostnames(hostname))
+    return template("general.tpl", title=hostname, content=hostname_list)
 
 
 if __name__ == '__main__':
