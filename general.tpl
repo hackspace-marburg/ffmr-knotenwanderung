@@ -50,6 +50,9 @@
         <li class="nav-item">
           <a class="nav-link" href="/bulk">Bulk</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/hackspace-marburg/ffmr-knotenwanderung">GitHub</a>
+        </li>
         </ul>
 
         <form class="form-inline mt-2 mt-md-0" action="/s" method="post">
