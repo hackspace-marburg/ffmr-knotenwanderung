@@ -9,7 +9,8 @@ NODES = None
 
 @route("/")
 def greet():
-    return template("general.tpl", title="Main", content=template("main.tpl"))
+    return template("general.tpl",
+            title="Main", content=template("main.tpl"), search=None)
 
 
 @post("/s")
@@ -24,13 +25,15 @@ def search_hostname():
 @get("/s/<hostname:re:35\d{3}-[\w-]{1,}>")
 def show_hostname(hostname):
     hostname_list = template("list.tpl", node_data=NODES.other_hostnames(hostname))
-    return template("general.tpl", title=hostname, content=hostname_list)
+    return template("general.tpl",
+            title=hostname, content=hostname_list, search=hostname)
 
 
 @error(404)
 @error(500)
 def error_page(err):
-    return template("general.tpl", title="Error", content="Something went wrong..")
+    return template("general.tpl",
+            title="Error", content="Something went wrong..", search=None)
 
 
 if __name__ == '__main__':
