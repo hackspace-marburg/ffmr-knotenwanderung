@@ -21,7 +21,7 @@ def search_hostname():
         redirect("/")
 
 
-@get("/s/<hostname>")
+@get("/s/<hostname:re:35\d{3}-[\w-]{1,}>")
 def show_hostname(hostname):
     hostname_list = template("list.tpl", node_data=NODES.other_hostnames(hostname))
     return template("general.tpl", title=hostname, content=hostname_list)
