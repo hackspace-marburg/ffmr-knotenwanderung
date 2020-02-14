@@ -2,6 +2,7 @@
 
 import configparser
 import influxdb
+import json
 
 
 class NodeMovement:
@@ -18,18 +19,20 @@ class NodeMovement:
 
     def hostname_to_node_ids(self, hostname):
         "List all 'node_id's for a 'hostname'."
+        params = params={"params": json.dumps({"hostname": hostname})}
         result = self._influx.query("""
             SHOW TAG VALUES WITH key = "node_id"
-            WHERE "hostname" = '{}'
-        """.format(hostname))
+            WHERE "hostname" = $hostname
+        """, params=params)
         return {p["value"] for p in result.get_points()}
 
     def node_id_to_hostnames(self, node_id):
         "List all 'hostname's for a 'node_id'."
+        params = params={"params": json.dumps({"node_id": node_id})}
         result = self._influx.query("""
             SHOW TAG VALUES WITH key = "hostname"
-            WHERE "node_id" = '{}'
-        """.format(node_id))
+            WHERE "node_id" = $node_id
+        """, params=params)
         return {p["value"] for p in result.get_points()}
 
     def other_hostnames(self, hostname):
@@ -45,3 +48,4 @@ if __name__ == '__main__':
     with NodeMovement(**conf["InfluxDBClient"]) as nm:
         print(nm.other_hostnames("35037-the-wired"))
         print(nm.other_hostnames("35043-Spiegelslustturm-00"))
+        print(nm.other_hostnames("'"))
