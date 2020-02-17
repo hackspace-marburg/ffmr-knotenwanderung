@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="knotenwanderung",
-    version="0.1.0",
     description="Check FFMR nodes for renaming",
     url="https://github.com/hackspace-marburg/ffmr-knotenwanderung",
     packages=find_packages(),
