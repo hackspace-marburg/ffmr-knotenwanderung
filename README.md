@@ -9,7 +9,7 @@ bulk requests.
 ## Development
 
 1. Install a recent Python 3 together with the dependencies specified in
-  `setup.py`: [bjoern][], [bottle][], and [influxdb-python][].
+  `setup.py`: [bjoern], [bottle], and [influxdb-python].
 2. Copy `knotenwanderung_example.ini` to `knotenwanderung.ini` and edit it.
 3. `python -m knotenwanderung.knotenserv knotenwanderung.ini`
 
@@ -38,8 +38,18 @@ included, one might configure its system as follows:
 ```
 
 
+## Licenses
+
+This application is released under the GNU Affero General Public License, as
+specified in the `LICENSE` file. However, this repository also contains a
+compiled version of [Bootstrap][bootstrap] (MIT License) and [jQuery][jquery]
+(jQuery License).
+
+
+[bjoern]: https://github.com/jonashaag/bjoern
+[bootstrap]: https://getbootstrap.com/
+[bottle]: https://bottlepy.org/docs/dev/
 [ffmr]: https://marburg.freifunk.net/
 [grafana]: https://grafana.hsmr.cc/
 [influxdb-python]: https://github.com/influxdata/influxdb-python
-[bjoern]: https://github.com/jonashaag/bjoern
-[bottle]: https://bottlepy.org/docs/dev/
+[jquery]: https://jquery.com/

@@ -6,7 +6,7 @@ import sys
 from functools import reduce, wraps
 
 from bottle import Bottle, HTTPError, HTTPResponse
-from bottle import abort, redirect, request, response, run, template
+from bottle import abort, redirect, request, response, run, static_file, template
 
 from knotenwanderung.knotenwanderung import Knotenwanderung
 
@@ -80,6 +80,12 @@ def bulk_search():
 @app.error(500)
 def error_page(err):
     return serve_template("Error", "Something went wrong..")
+
+
+@app.get("/static/<filepath:path>")
+def serve_static(filepath):
+    static_dir = pathlib.PurePath(__file__).parent.joinpath("static")
+    return static_file(filepath, root=static_dir)
 
 
 def bottle_logger(fn):

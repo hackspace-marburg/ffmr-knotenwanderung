@@ -1,1 +1,2 @@
+include knotenwanderung/static/*
 include knotenwanderung/templates/*.tpl
