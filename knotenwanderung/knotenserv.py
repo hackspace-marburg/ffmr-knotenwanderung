@@ -1,13 +1,19 @@
 import configparser
+import logging
 import pathlib
 import sys
 
-from bottle import abort, error, get, post, redirect, request, route, run, template
-from functools import reduce
+from functools import reduce, wraps
+
+from bottle import Bottle, HTTPError, HTTPResponse
+from bottle import abort, redirect, request, response, run, template
+
 from knotenwanderung.knotenwanderung import Knotenwanderung
 
 
+app = Bottle()
 nodes = None
+logger = logging.getLogger("knotenwanderung")
 
 
 def load_template(name, **kwargs):
@@ -22,21 +28,21 @@ def serve_template(title, content, search=None):
     return load_template("general", title=title, content=content, search=search)
 
 
-@route("/")
+@app.get("/")
 def greet():
     return serve_template("Main", load_template("main"))
 
 
-@post("/s")
+@app.post("/s")
 def search_hostname():
     hostname = request.forms.get("hostname")
     if hostname is not None and hostname != "":
-        redirect("/s/{}".format(hostname))
+        redirect(f"/s/{hostname}")
     else:
         redirect("/")
 
 
-@get("/s/<hostname>")
+@app.get("/s/<hostname>")
 def show_hostname(hostname):
     if not nodes.valid_hostname(hostname):
         abort(500)
@@ -47,12 +53,12 @@ def show_hostname(hostname):
             hostname)
 
 
-@get("/bulk")
+@app.get("/bulk")
 def bulk_mask():
     return serve_template("Bulk Search", load_template("bulk_search"))
 
 
-@post("/bulk")
+@app.post("/bulk")
 def bulk_search():
     hostnames = request.forms.get("hostnames")
     if hostnames is None or hostnames.strip() == "":
@@ -70,15 +76,39 @@ def bulk_search():
             load_template("bulk_result", hostname_len=hostname_len))
 
 
-@error(404)
-@error(500)
+@app.error(404)
+@app.error(500)
 def error_page(err):
     return serve_template("Error", "Something went wrong..")
 
 
+def bottle_logger(fn):
+    "Wraps bottle's logger into Python logging."
+    @wraps(fn)
+    def _bottle_logger(*args, **kwargs):
+        try:
+            resp = fn(*args, **kwargs)
+            logger.info(f"{request.method} {response.status_code} {request.path}")
+            return resp
+        except HTTPError as e:
+            logger.warning(f"{request.method} {e.status_code} {request.path}: {e.body}")
+            raise e
+        except HTTPResponse as r:
+            if r.status_code == 303:
+                logger.info(f"{request.method} {r.status_code} {request.path} -> {r._headers}")
+            else:
+                logger.info(f"{request.method} {r.status_code} {request.path}")
+            raise r
+        except Exception as e:
+            logger.error(f"{request.method} {request.path}: {e}")
+            raise e
+
+    return _bottle_logger
+
+
 def main():
     if len(sys.argv) != 2:
-        print("Usage: {} config.ini".format(sys.argv[0]))
+        print(f"Usage: {sys.argv[0]} config.ini")
         return
 
     conf = configparser.ConfigParser()
@@ -87,8 +117,17 @@ def main():
     global nodes
     nodes = Knotenwanderung(**conf["influxdb"])
 
-    bottle_run_kwargs = {**{"server": "bjoern"}, **conf["bottle"]}
-    run(**bottle_run_kwargs)
+    logHandler = logging.StreamHandler()
+    logHandler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+
+    logger.addHandler(logHandler)
+    logger.setLevel(logging.INFO)
+
+    app.install(bottle_logger)
+
+    run(**{
+        **{"app": app, "server": "bjoern", "quiet": True},
+        **conf["bottle"]})
 
 
 if __name__ == '__main__':
