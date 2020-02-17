@@ -25,10 +25,10 @@ included, one might configure its system as follows:
 
     # Values from the ini configuration.
     config = {
-      InfluxDBClient = {
+      influxdb = {
         host = "influx.example.com"; port = 1312; database = "ff";
       };
-      Bottle = {
+      bottle = {
         host = "localhost"; port = 8080;
       };
     };

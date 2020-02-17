@@ -80,8 +80,8 @@ def main():
     conf.read(sys.argv[1])
 
     global nodes
-    nodes = Knotenwanderung(**conf["InfluxDBClient"])
-    run(**conf["Bottle"])
+    nodes = Knotenwanderung(**conf["influxdb"])
+    run(**conf["bottle"])
 
 
 if __name__ == '__main__':

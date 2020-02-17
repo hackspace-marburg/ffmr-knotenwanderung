@@ -31,10 +31,10 @@ in {
       type = types.attrs;
       description = "A set to mimic knotenwanderung's configuration INI file.";
       example = {
-        InfluxDBClient = {
+        influxdb = {
           host = "influx.example.com"; port = 1312; database = "ff";
         };
-        Bottle = {
+        bottle = {
           host = "localhost"; port = 8080;
         };
       };
