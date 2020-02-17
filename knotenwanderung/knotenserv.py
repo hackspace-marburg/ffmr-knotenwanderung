@@ -86,7 +86,9 @@ def main():
 
     global nodes
     nodes = Knotenwanderung(**conf["influxdb"])
-    run(**conf["bottle"])
+
+    bottle_run_kwargs = {**{"server": "bjoern"}, **conf["bottle"]}
+    run(**bottle_run_kwargs)
 
 
 if __name__ == '__main__':

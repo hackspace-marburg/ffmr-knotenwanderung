@@ -5,7 +5,7 @@ setup(
     description="Check FFMR nodes for renaming",
     url="https://github.com/hackspace-marburg/ffmr-knotenwanderung",
     packages=find_packages(),
-    install_requires=["bottle", "influxdb"],
+    install_requires=["bjoern", "bottle", "influxdb"],
     include_package_data=True,
     entry_points={
       "console_scripts": ["knotenwanderung=knotenwanderung.knotenserv:main"]

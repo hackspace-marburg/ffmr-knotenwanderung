@@ -8,7 +8,8 @@ bulk requests.
 
 ## Development
 
-1. Install a recent Python 3 together with [bottle][] and [influxdb-python][].
+1. Install a recent Python 3 together with the dependencies specified in
+  `setup.py`: [bjoern][], [bottle][], and [influxdb-python][].
 2. Copy `knotenwanderung_example.ini` to `knotenwanderung.ini` and edit it.
 3. `python -m knotenwanderung.knotenserv knotenwanderung.ini`
 
@@ -40,4 +41,5 @@ included, one might configure its system as follows:
 [ffmr]: https://marburg.freifunk.net/
 [grafana]: https://grafana.hsmr.cc/
 [influxdb-python]: https://github.com/influxdata/influxdb-python
+[bjoern]: https://github.com/jonashaag/bjoern
 [bottle]: https://bottlepy.org/docs/dev/

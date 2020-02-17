@@ -15,7 +15,7 @@ let
     #};
     src = lib.cleanSource ./.;
 
-    propagatedBuildInputs = [ bottle influxdb ];
+    propagatedBuildInputs = [ bjoern bottle influxdb ];
   };
 
   cfg = config.services.knotenwanderung;
