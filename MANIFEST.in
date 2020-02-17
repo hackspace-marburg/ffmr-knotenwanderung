@@ -1,1 +1,1 @@
-include knotenwanderung/*.tpl
+include knotenwanderung/templates/*.tpl

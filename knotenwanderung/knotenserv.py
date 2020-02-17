@@ -1,20 +1,30 @@
 import configparser
+import pathlib
 import sys
 
 from bottle import abort, error, get, post, redirect, request, route, run, template
 from functools import reduce
 from knotenwanderung.knotenwanderung import Knotenwanderung
-from os import path
 
 
 nodes = None
 
 
+def load_template(name, **kwargs):
+    "Wrapper around bottle's template function for the right template path."
+    template_dir = pathlib.PurePath(__file__).parent.joinpath("templates")
+    template_file = f"{template_dir}/{name}.tpl"
+    return template(template_file, **kwargs)
+
+
+def serve_template(title, content, search=None):
+    "Serve the general template."
+    return load_template("general", title=title, content=content, search=search)
+
+
 @route("/")
 def greet():
-    main_tpl = template("{}/main.tpl".format(path.dirname(__file__)))
-    return template("{}/general.tpl".format(path.dirname(__file__)),
-            title="Main", content=main_tpl, search=None)
+    return serve_template("Main", load_template("main"))
 
 
 @post("/s")
@@ -31,17 +41,15 @@ def show_hostname(hostname):
     if not nodes.valid_hostname(hostname):
         abort(500)
 
-    hostname_list = template("{}/list.tpl".format(path.dirname(__file__)),
-        node_data=nodes.other_hostnames(hostname))
-    return template("{}/general.tpl".format(path.dirname(__file__)),
-            title=hostname, content=hostname_list, search=hostname)
+    return serve_template(
+            hostname,
+            load_template("list", node_data=nodes.other_hostnames(hostname)),
+            hostname)
 
 
 @get("/bulk")
 def bulk_mask():
-    bulk_mask_tpl = template("{}/bulk_search.tpl".format(path.dirname(__file__)))
-    return template("{}/general.tpl".format(path.dirname(__file__)),
-            title="Bulk Search", content=bulk_mask_tpl, search=None)
+    return serve_template("Bulk Search", load_template("bulk_search"))
 
 
 @post("/bulk")
@@ -58,17 +66,14 @@ def bulk_search():
     hostname_len = {k: reduce(lambda a, b: a + b, list(map(len, v.values())) + [0])
             for k, v in hostname_map.items()}
 
-    hostname_len_tpl = template("{}/bulk_result.tpl".format(path.dirname(__file__)),
-        hostname_len=hostname_len)
-    return template("{}/general.tpl".format(path.dirname(__file__)),
-            title="Bulk Search", content=hostname_len_tpl, search=None)
+    return serve_template("Bulk Search",
+            load_template("bulk_result", hostname_len=hostname_len))
 
 
 @error(404)
 @error(500)
 def error_page(err):
-    return template("{}/general.tpl".format(path.dirname(__file__)),
-            title="Error", content="Something went wrong..", search=None)
+    return serve_template("Error", "Something went wrong..")
 
 
 def main():
