@@ -8,11 +8,11 @@
 </div>
 % end
 
-% for (node_id, hostnames) in node_data.items():
-<h2>{{node_id}}</h2>
+% for node in node_data:
+<h2>{{node.node_id}}</h2>
 <ul>
-  %for hostname in sorted(hostnames):
-    <li><a href="https://grafana.hsmr.cc/dashboard/db/ffmr-node-details?orgId=1&var-hostname={{hostname}}">{{hostname}}</a></li>
+  %for host in sorted(node.hosts):
+    <li><a href="https://grafana.hsmr.cc/dashboard/db/ffmr-node-details?orgId=1&var-hostname={{host.hostname}}">{{host.hostname}}</a></li>
   %end
 </ul>
 % end

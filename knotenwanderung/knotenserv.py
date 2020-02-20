@@ -49,7 +49,7 @@ def show_hostname(hostname):
 
     return serve_template(
             hostname,
-            load_template("list", node_data=nodes.other_hostnames(hostname)),
+            load_template("list", node_data=nodes.nodes_for_hostname(hostname)),
             hostname)
 
 
@@ -66,10 +66,10 @@ def bulk_search():
 
     # map each entered hostname to an amount of other hostnames
     # thus: 0 means unknown, 1 means unique, >1 means KNOTENWANDERUNG
-    hostname_lst = map(lambda x: x.strip(), hostnames.strip().split("\n"))
-    hostname_map = {h: nodes.other_hostnames(h)
-            for h in hostname_lst if nodes.valid_hostname(h)}
-    hostname_len = {k: reduce(lambda a, b: a + b, list(map(len, v.values())) + [0])
+    hostname_map = {h.strip(): nodes.nodes_for_hostname(h.strip())
+            for h in hostnames.strip().split("\n")
+            if nodes.valid_hostname(h.strip())}
+    hostname_len = {k: reduce(lambda a, b: a + b, list(map(lambda x: len(x.hosts), v)) + [0])
             for k, v in hostname_map.items()}
 
     return serve_template("Bulk Search",

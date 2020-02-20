@@ -27,6 +27,9 @@ class Host:
     def __repr__(self):
         return f"{self.node_id} {self.hostname}"
 
+    def __lt__(self, other):
+        return self.hostname < other.hostname
+
 
 class Knotenwanderung:
     "Wrapper class for InfluxDBClient to query the occurrence for some node."
@@ -58,19 +61,6 @@ class Knotenwanderung:
 
         return [Node(node_id) for node_id in unique_node_ids]
 
-    # XXX
-    def hostname_to_node_ids(self, hostname):
-        "List all 'node_id's for a 'hostname'."
-        if not self.valid_hostname(hostname):
-            return {}
-
-        params = params={"params": json.dumps({"hostname": hostname})}
-        result = self._influx.query("""
-            SHOW TAG VALUES WITH key = "node_id"
-            WHERE "hostname" = $hostname
-        """, params=params)
-        return list({p["value"] for p in result.get_points()})
-
     def _populate_node_hosts(self, node):
         params = params={"params": json.dumps({"node_id": node.node_id})}
         result = self._influx.query("""
@@ -80,16 +70,6 @@ class Knotenwanderung:
         hostnames = {p["value"] for p in result.get_points()}
 
         node.hosts = [Host(node, hostname) for hostname in hostnames]
-
-    # XXX
-    def node_id_to_hostnames(self, node_id):
-        "List all 'hostname's for a 'node_id'."
-        params = params={"params": json.dumps({"node_id": node_id})}
-        result = self._influx.query("""
-            SHOW TAG VALUES WITH key = "hostname"
-            WHERE "node_id" = $node_id
-        """, params=params)
-        return list({p["value"] for p in result.get_points()})
 
     def _populate_host_values(self, host):
         params = params={"params": json.dumps(
@@ -106,12 +86,6 @@ class Knotenwanderung:
             WHERE "node_id" = $node_id AND "hostname" = $hostname
         """, params=params)
         host.last = result.get_points().__next__()['time']
-
-    # XXX
-    def other_hostnames(self, hostname):
-        "Return a dict of all 'hostname's sharing the same 'node_id'."
-        node_ids = self.hostname_to_node_ids(hostname)
-        return {node_id: self.node_id_to_hostnames(node_id) for node_id in node_ids}
 
     def _populate_node(self, node):
         self._populate_node_hosts(node)
