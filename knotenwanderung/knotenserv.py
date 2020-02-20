@@ -60,7 +60,7 @@ def bulk_mask():
 
 @app.post("/bulk")
 def bulk_search():
-    hostnames = request.forms.get("hostnames")
+    hostnames = request.forms.hostnames
     if hostnames is None or hostnames.strip() == "":
         redirect("/bulk")
 
