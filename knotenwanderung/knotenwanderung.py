@@ -46,7 +46,7 @@ class Host:
         return f"{self.node_id}/{self.hostname}"
 
     def __lt__(self, other):
-        return self.first < other.first
+        return self.last < other.last
 
 
 class Knotenwanderung:
