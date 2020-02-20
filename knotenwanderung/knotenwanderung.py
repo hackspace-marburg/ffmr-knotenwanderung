@@ -46,7 +46,7 @@ class Host:
         return f"{self.node_id}/{self.hostname}"
 
     def __lt__(self, other):
-        return self.hostname < other.hostname
+        return self.first < other.first
 
 
 class Knotenwanderung:
@@ -112,7 +112,8 @@ class Knotenwanderung:
         """, params=params)
         last = result.get_points().__next__()['time']
 
-        return {"first": first, "last": last}
+        return {"first": datetime.datetime.strptime(first, "%Y-%m-%dT%H:%M:%SZ"),
+                "last": datetime.datetime.strptime(last, "%Y-%m-%dT%H:%M:%SZ")}
 
     def _populate_node(self, node):
         hostnames = self._fetch_hosts_for_node_id(node.node_id)
@@ -122,6 +123,8 @@ class Knotenwanderung:
             host_data = self._fetch_host_values(str(host.node_id), host.hostname)
             host.first = host_data['first']
             host.last = host_data['last']
+
+        node.hosts.sort()
 
     def node(self, node_id):
         "Create a populated Node by its node_id."
