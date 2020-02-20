@@ -120,7 +120,7 @@ def main():
     nodes = Knotenwanderung(**conf["influxdb"])
 
     logHandler = logging.StreamHandler()
-    logHandler.setFormatter(logging.Formatter("%(levelname)-5s %(message)s"))
+    logHandler.setFormatter(logging.Formatter("%(levelname)-7s %(message)s"))
 
     logger.addHandler(logHandler)
     logger.setLevel(logging.DEBUG)

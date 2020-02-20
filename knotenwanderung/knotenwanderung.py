@@ -63,7 +63,7 @@ class Knotenwanderung:
 
     def valid_hostname(self, hostname):
         "Checks if some hostname satisfies the FFMR regex."
-        p = re.compile("35\d{3}-[\w-]{1,}")
+        p = re.compile("35\d{3}-[\w\.-]+")
         return p.fullmatch(hostname) != None
 
     @cached(cache=DayCache(1024))
