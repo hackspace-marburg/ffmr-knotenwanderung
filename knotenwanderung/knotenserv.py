@@ -64,16 +64,12 @@ def bulk_search():
     if hostnames is None or hostnames.strip() == "":
         redirect("/bulk")
 
-    # map each entered hostname to an amount of other hostnames
-    # thus: 0 means unknown, 1 means unique, >1 means KNOTENWANDERUNG
     hostname_map = {h.strip(): nodes.nodes_for_hostname(h.strip())
             for h in hostnames.strip().split("\n")
             if nodes.valid_hostname(h.strip())}
-    hostname_len = {k: reduce(lambda a, b: a + b, list(map(lambda x: len(x.hosts), v)) + [0])
-            for k, v in hostname_map.items()}
 
     return serve_template("Bulk Search",
-            load_template("bulk_result", hostname_len=hostname_len))
+            load_template("bulk_result", hostname_map=hostname_map))
 
 
 @app.error(404)
