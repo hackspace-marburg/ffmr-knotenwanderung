@@ -9,7 +9,7 @@ bulk requests.
 ## Development
 
 1. Install a recent Python 3 together with the dependencies specified in
-  `setup.py`: [bjoern], [bottle], and [influxdb-python].
+  `setup.py`: [bjoern], [bottle], [cachetools], and [influxdb-python].
 2. Copy `knotenwanderung_example.ini` to `knotenwanderung.ini` and edit it.
 3. `python -m knotenwanderung.knotenserv knotenwanderung.ini`
 
@@ -49,6 +49,7 @@ compiled version of [Bootstrap][bootstrap] (MIT License) and [jQuery][jquery]
 [bjoern]: https://github.com/jonashaag/bjoern
 [bootstrap]: https://getbootstrap.com/
 [bottle]: https://bottlepy.org/docs/dev/
+[cachetools]: https://github.com/tkem/cachetools
 [ffmr]: https://marburg.freifunk.net/
 [grafana]: https://grafana.hsmr.cc/
 [influxdb-python]: https://github.com/influxdata/influxdb-python

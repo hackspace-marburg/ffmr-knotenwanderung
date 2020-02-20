@@ -1,6 +1,24 @@
+import datetime
 import influxdb
 import json
+import logging
 import re
+
+from cachetools import cached, TTLCache
+
+
+logger = logging.getLogger("knotenwanderung")
+
+
+class DayCache(TTLCache):
+    "A Cache implementation which holds a value untils the day's end."
+
+    def timer(self):
+        now = datetime.date.today()
+        return now.year * (10 ** 4) + now.month * (10 ** 2) + now.day
+
+    def __init__(self, maxsize, **kwargs):
+        super().__init__(maxsize, ttl=0, timer=self.timer, **kwargs)
 
 
 class Node:
@@ -25,7 +43,7 @@ class Host:
         self.hostname = hostname
 
     def __repr__(self):
-        return f"{self.node_id} {self.hostname}"
+        return f"{self.node_id}/{self.hostname}"
 
     def __lt__(self, other):
         return self.hostname < other.hostname
@@ -48,7 +66,10 @@ class Knotenwanderung:
         p = re.compile("35\d{3}-[\w-]{1,}")
         return p.fullmatch(hostname) != None
 
-    def _nodes_for_hostname(self, hostname):
+    @cached(cache=DayCache(1024))
+    def _fetch_nodes_for_hostname(self, hostname):
+        logger.debug(f"fetch nodes for hostname \"{hostname}\"")
+
         if not self.valid_hostname(hostname):
             return []
 
@@ -61,36 +82,46 @@ class Knotenwanderung:
 
         return [Node(node_id) for node_id in unique_node_ids]
 
-    def _populate_node_hosts(self, node):
-        params = params={"params": json.dumps({"node_id": node.node_id})}
+    @cached(cache=DayCache(1024))
+    def _fetch_hosts_for_node_id(self, node_id):
+        logger.debug(f"fetch hosts for node \"{node_id}\"")
+
+        params = params={"params": json.dumps({"node_id": node_id})}
         result = self._influx.query("""
             SHOW TAG VALUES WITH key = "hostname"
             WHERE "node_id" = $node_id
         """, params=params)
-        hostnames = {p["value"] for p in result.get_points()}
+        return {p["value"] for p in result.get_points()}
 
-        node.hosts = [Host(node, hostname) for hostname in hostnames]
+    @cached(cache=DayCache(1024))
+    def _fetch_host_values(self, node_id, hostname):
+        logger.debug(f"fetch host values for \"{node_id}/{hostname}\"")
 
-    def _populate_host_values(self, host):
         params = params={"params": json.dumps(
-            {"node_id": str(host.node_id), "hostname": host.hostname})}
+            {"node_id": node_id, "hostname": hostname})}
 
         result = self._influx.query("""
             SELECT FIRST(*) FROM "clients"
             WHERE "node_id" = $node_id AND "hostname" = $hostname
         """, params=params)
-        host.first = result.get_points().__next__()['time']
+        first = result.get_points().__next__()['time']
 
         result = self._influx.query("""
             SELECT LAST(*) FROM "clients"
             WHERE "node_id" = $node_id AND "hostname" = $hostname
         """, params=params)
-        host.last = result.get_points().__next__()['time']
+        last = result.get_points().__next__()['time']
+
+        return {"first": first, "last": last}
 
     def _populate_node(self, node):
-        self._populate_node_hosts(node)
+        hostnames = self._fetch_hosts_for_node_id(node.node_id)
+        node.hosts = [Host(node, hostname) for hostname in hostnames]
+
         for host in node.hosts:
-            self._populate_host_values(host)
+            host_data = self._fetch_host_values(str(host.node_id), host.hostname)
+            host.first = host_data['first']
+            host.last = host_data['last']
 
     def node(self, node_id):
         "Create a populated Node by its node_id."
@@ -100,7 +131,7 @@ class Knotenwanderung:
 
     def nodes_for_hostname(self, hostname):
         "Create a list of populated Nodes identified by a hostname."
-        nodes = self._nodes_for_hostname(hostname)
+        nodes = self._fetch_nodes_for_hostname(hostname)
         for node in nodes:
             self._populate_node(node)
         return nodes

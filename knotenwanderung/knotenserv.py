@@ -8,7 +8,7 @@ from functools import reduce, wraps
 from bottle import Bottle, HTTPError, HTTPResponse
 from bottle import abort, redirect, request, response, run, static_file, template
 
-from knotenwanderung.knotenwanderung import Knotenwanderung
+from .knotenwanderung import Knotenwanderung
 
 
 app = Bottle()
@@ -124,10 +124,10 @@ def main():
     nodes = Knotenwanderung(**conf["influxdb"])
 
     logHandler = logging.StreamHandler()
-    logHandler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+    logHandler.setFormatter(logging.Formatter("%(levelname)-5s %(message)s"))
 
     logger.addHandler(logHandler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     app.install(bottle_logger)
 
