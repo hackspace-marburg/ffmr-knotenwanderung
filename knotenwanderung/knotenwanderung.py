@@ -24,7 +24,7 @@ class DayCache(TTLCache):
 class Node:
     "Node represents one Freifunk Node with its different hostnames."
 
-    __slots__ = ["node_id", "hosts"]
+    __slots__ = ["node_id", "hosts", "availability"]
     def __init__(self, node_id):
         self.node_id = node_id
 
@@ -83,6 +83,22 @@ class Knotenwanderung:
         return [Node(node_id) for node_id in unique_node_ids]
 
     @cached(cache=DayCache(1024))
+    def _fetch_availability_for_node_id(self, node_id):
+        logger.debug(f"fetch availability for node \"{node_id}\"")
+
+        params = params={"params": json.dumps({"node_id": node_id})}
+        result = self._influx.query("""
+            SELECT count("value")  / (60 * 24 * 30) FROM "clients"
+            WHERE "node_id" = $node_id AND time > now() - 30d
+        """, params=params)
+
+        counts = list(result.get_points())
+        if len(counts) == 1:
+            return counts[0]["count"]
+        else:
+            return 0.0
+
+    @cached(cache=DayCache(1024))
     def _fetch_hosts_for_node_id(self, node_id):
         logger.debug(f"fetch hosts for node \"{node_id}\"")
 
@@ -104,18 +120,20 @@ class Knotenwanderung:
             SELECT FIRST(*) FROM "clients"
             WHERE "node_id" = $node_id AND "hostname" = $hostname
         """, params=params)
-        first = result.get_points().__next__()['time']
+        first = result.get_points().__next__()["time"]
 
         result = self._influx.query("""
             SELECT LAST(*) FROM "clients"
             WHERE "node_id" = $node_id AND "hostname" = $hostname
         """, params=params)
-        last = result.get_points().__next__()['time']
+        last = result.get_points().__next__()["time"]
 
         return {"first": datetime.datetime.strptime(first, "%Y-%m-%dT%H:%M:%SZ"),
                 "last": datetime.datetime.strptime(last, "%Y-%m-%dT%H:%M:%SZ")}
 
     def _populate_node(self, node):
+        node.availability = self._fetch_availability_for_node_id(node.node_id)
+
         hostnames = self._fetch_hosts_for_node_id(node.node_id)
         node.hosts = [Host(node, hostname) for hostname in hostnames]
 

@@ -10,6 +10,7 @@
       <th scope="col">Requested Hostname</th>
       <th scope="col">Current Hostname</th>
       <th scope="col">Last seen</th>
+      <th scope="col">Availability</th>
       <th scope="col"></th>
     </tr>
   </thead>
@@ -18,7 +19,7 @@
     % if len(nodes) != 1 or len(nodes[0].hosts) == 0:
     <tr class="table-warning">
       <td>{{hostname}}</td>
-      <td colspan="2">
+      <td colspan="3">
       % if len(nodes) == 0:
       Unknown hostname
       % elif len(nodes) > 1:
@@ -34,6 +35,7 @@
       <td>{{hostname}}</td>
       <td>{{nodes[0].hosts[-1].hostname}}</td>
       <td>{{nodes[0].hosts[-1].last.strftime("%Y-%m-%d")}}</td>
+      <td>{{"{:.2f}".format(nodes[0].availability * 100)}}%</td>
       <td><a href="/s/{{hostname}}">Details</a></td>
     </tr>
     % end

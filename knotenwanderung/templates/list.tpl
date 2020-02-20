@@ -16,8 +16,13 @@
   % if len(node.hosts) > 0:
   <p>
     This node appeared first at {{node.hosts[0].first.strftime("%Y-%m-%d")}} and
-    last at {{node.hosts[-1].last.strftime("%Y-%m-%d")}} with
-    {{len(node.hosts)}} hostnames.
+    last at {{node.hosts[-1].last.strftime("%Y-%m-%d")}}
+    with {{len(node.hosts)}} hostnames.
+  </p>
+
+  <p>
+    The availability for the last 30 days are
+    {{"{:.2f}".format(node.availability * 100)}}%.
   </p>
 
   <hr>
