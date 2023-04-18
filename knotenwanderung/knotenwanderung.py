@@ -10,17 +10,6 @@ from cachetools import cached, TTLCache
 logger = logging.getLogger("knotenwanderung")
 
 
-class DayCache(TTLCache):
-    "A Cache implementation which holds a value untils the day's end."
-
-    def timer(self):
-        now = datetime.date.today()
-        return now.year * (10 ** 4) + now.month * (10 ** 2) + now.day
-
-    def __init__(self, maxsize, **kwargs):
-        super().__init__(maxsize, ttl=0, timer=self.timer, **kwargs)
-
-
 class Node:
     "Node represents one Freifunk Node with its different hostnames."
 
@@ -66,7 +55,7 @@ class Knotenwanderung:
         p = re.compile("35\d{3}-[\w\.-]+")
         return p.fullmatch(hostname) != None
 
-    @cached(cache=DayCache(1024))
+    @cached(cache=TTLCache(maxsize=1024, ttl=3600))
     def _fetch_nodes_for_hostname(self, hostname):
         logger.debug(f"fetch nodes for hostname \"{hostname}\"")
 
@@ -82,7 +71,7 @@ class Knotenwanderung:
 
         return [Node(node_id) for node_id in unique_node_ids]
 
-    @cached(cache=DayCache(1024))
+    @cached(cache=TTLCache(1024, ttl=3600))
     def _fetch_availability_for_node_id(self, node_id):
         logger.debug(f"fetch availability for node \"{node_id}\"")
 
@@ -98,7 +87,7 @@ class Knotenwanderung:
         else:
             return 0.0
 
-    @cached(cache=DayCache(1024))
+    @cached(cache=TTLCache(1024, ttl=3600))
     def _fetch_hosts_for_node_id(self, node_id):
         logger.debug(f"fetch hosts for node \"{node_id}\"")
 
@@ -109,7 +98,7 @@ class Knotenwanderung:
         """, params=params)
         return {p["value"] for p in result.get_points()}
 
-    @cached(cache=DayCache(1024))
+    @cached(cache=TTLCache(1024, ttl=3600))
     def _fetch_host_values(self, node_id, hostname):
         logger.debug(f"fetch host values for \"{node_id}/{hostname}\"")
 
