@@ -71,7 +71,7 @@
       </div>
     </main>
 
-    <script src="/static/jquery-3.4.1.slim.min.js"></script>
+    <script src="/static/jquery.slim.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
   </body>
 </html>
